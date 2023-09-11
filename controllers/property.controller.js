@@ -1,7 +1,6 @@
 import Property from "../mongodb/models/property.js";
 import User from "../mongodb/models/user.js";
 
-import mongoose from "mongoose";
 import * as dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -14,6 +13,7 @@ cloudinary.config({
 });
 
 const getAllProperties = async (req, res) => {
+
     const {
         _end,
         _order,
@@ -45,12 +45,16 @@ const getAllProperties = async (req, res) => {
         res.header("Access-Control-Expose-Headers", "x-total-count");
 
         res.status(200).json(properties);
+
     } catch (error) {
+
         res.status(500).json({ message: error.message });
+
     }
 };
 
 const getPropertyDetail = async (req, res) => {
+
     const { id } = req.params;
     const propertyExists = await Property.findOne({ _id: id }).populate(
         "creator",
@@ -61,6 +65,7 @@ const getPropertyDetail = async (req, res) => {
     } else {
         res.status(404).json({ message: "Property not found" });
     }
+
 };
 
 const createProperty = async (req, res) => {
@@ -75,10 +80,8 @@ const createProperty = async (req, res) => {
             email,
         } = req.body;
 
-        const session = await mongoose.startSession();
-        session.startTransaction();
 
-        const user = await User.findOne({ email }).session(session);
+        const user = await User.findOne({ email });
 
         if (!user) throw new Error("User not found");
 
@@ -95,9 +98,7 @@ const createProperty = async (req, res) => {
         });
 
         user.allProperties.push(newProperty._id);
-        await user.save({ session });
-
-        await session.commitTransaction();
+        await user.save();
 
         res.status(200).json({ message: "Property created successfully" });
     } catch (error) {
@@ -141,14 +142,11 @@ const deleteProperty = async (req, res) => {
 
         if (!propertyToDelete) throw new Error("Property not found");
 
-        const session = await mongoose.startSession();
-        session.startTransaction();
 
-        propertyToDelete.remove({ session });
+        propertyToDelete.remove();
         propertyToDelete.creator.allProperties.pull(propertyToDelete);
 
-        await propertyToDelete.creator.save({ session });
-        await session.commitTransaction();
+        await propertyToDelete.creator.save();
 
         res.status(200).json({ message: "Property deleted successfully" });
     } catch (error) {

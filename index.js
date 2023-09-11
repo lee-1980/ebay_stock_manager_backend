@@ -5,7 +5,8 @@ import cors from "cors";
 import connectDB from "./mongodb/connect.js";
 import userRouter from "./routes/user.routes.js";
 import propertyRouter from "./routes/property.routes.js";
-
+import febestRouter from "./routes/febest.routes.js";
+import autoplusRouter from "./routes/autoplus.routes.js";
 dotenv.config();
 
 const app = express();
@@ -17,15 +18,19 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/properties", propertyRouter);
+app.use("/api/v1/Properties", propertyRouter);
+app.use("/api/v1/Febest", febestRouter);
+app.use("/api/v1/Autoplus", autoplusRouter);
 
 const startServer = async () => {
     try {
+
         connectDB(process.env.MONGODB_URL);
 
         app.listen(8080, () =>
             console.log("Server started on port http://localhost:8080"),
         );
+
     } catch (error) {
         console.log(error);
     }
