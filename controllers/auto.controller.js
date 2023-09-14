@@ -8,21 +8,20 @@ const getAllAutopluses = async (req, res) => {
         _order,
         _start,
         _sort,
-        title_like = "",
+        item_number_like = "",
     } = req.query;
 
     const query = {};
 
-
-    if (title_like) {
-        query.title = { $regex: title_like, $options: "i" };
+    if (item_number_like) {
+        query.item_number = { $regex: item_number_like, $options: "i" };
     }
 
     try {
         const count = await Autoplus.countDocuments({ query });
 
         const properties = await Autoplus.find(query)
-            .limit(_end)
+            .limit(_end - _start)
             .skip(_start)
             .sort({ [_sort]: _order });
 
@@ -59,9 +58,6 @@ const createAutoplus = async (req, res) => {
             fsku,
         } = req.body;
 
-
-        if (!user) throw new Error("User not found");
-
         await Autoplus.create({
             item_number,
             csku,
@@ -80,7 +76,6 @@ const updateAutoplus = async (req, res) => {
         const { item_number, csku, fsku} =
             req.body;
 
-
         await Autoplus.findByIdAndUpdate(
             { _id: id },
             {
@@ -89,7 +84,6 @@ const updateAutoplus = async (req, res) => {
                 fsku
             },
         );
-
         res.status(200).json({ message: "Autoplus updated successfully" });
     } catch (error) {
         res.status(500).json({ message: error.message });

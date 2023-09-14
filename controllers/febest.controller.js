@@ -8,21 +8,21 @@ const getAllFebests = async (req, res) => {
         _order,
         _start,
         _sort,
-        title_like = "",
+        item_number_like = "",
     } = req.query;
 
     const query = {};
 
 
-    if (title_like) {
-        query.title = { $regex: title_like, $options: "i" };
+    if (item_number_like) {
+        query.item_number = { $regex: item_number_like, $options: "i" };
     }
 
     try {
         const count = await Febest.countDocuments({ query });
 
         const properties = await Febest.find(query)
-            .limit(_end)
+            .limit(_end - _start)
             .skip(_start)
             .sort({ [_sort]: _order });
 
@@ -60,8 +60,6 @@ const createFebest = async (req, res) => {
         } = req.body;
 
 
-        if (!user) throw new Error("User not found");
-
         await Febest.create({
             item_number,
             csku,
@@ -79,7 +77,6 @@ const updateFebest = async (req, res) => {
         const { id } = req.params;
         const { item_number, csku, fsku} =
             req.body;
-
 
         await Febest.findByIdAndUpdate(
             { _id: id },
