@@ -83,12 +83,17 @@ async function fetchEBayOrders() {
 
         console.log(lastAPICallTime)
         // Handle and process the fetched orders (parse response.data)
+        // const result = await eBayAutoParts.sell.fulfillment.getOrders({
+        //     filter: 'creationdate:[' + new Date(lastAPICallTime).toISOString() + '..]',
+        // });
         const result = await eBayAutoParts.sell.fulfillment.getOrders({
-            filter: 'creationdate:[' + new Date(lastAPICallTime).toISOString() + '..]',
+            filter: 'creationdate:[2023-09-10T11:47:05.000Z..2023-09-10T11:47:05.000Z]',
         });
 
         // Implement order processing logic here
         console.log(`Fetched ${result.orders.length} eBay orders From AutoParts Store.`);
+
+        console.log(result.orders[0]);
 
         writeLog({
             type: 'info',
@@ -107,7 +112,7 @@ async function fetchEBayOrders() {
 
         writeLog({
             type: 'Error',
-            description : error.message,
+            description : 'Error fetching eBay orders:' + error.message,
             date: new Date().toISOString()
         })
     }
@@ -238,7 +243,7 @@ const run_scheduler = () => {
     // console.log('run scheduler');
     // schedule.scheduleJob('*/30 * * * * *', testfunction);
     // schedule.scheduleJob('*/30 * * * * *', fetchEBayOrders);
-    fetchEBayOrders();
+    // fetchEBayOrders();
 }
 
 
