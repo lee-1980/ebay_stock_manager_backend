@@ -8,40 +8,14 @@ import readline from "readline";
 // Import Property model
 import Property from "../mongodb/models/property.js";
 import { writeLog } from "./log.controller.js";
+import { initializeEbay, getAuthToken} from "../util/ebay.js";
+import { timeConverter} from "../util/timeConverter.js";
 
-
-dotenv.config();
 // eBay API credentials
-let eBayAutoParts = new eBayApi({
-    appId: process.env.EBAY_APP_ID,
-    certId: process.env.EBAY_CERT_ID,
-    ruName: process.env.EBAY_RUNAME,
-    sandbox: false,
-})
 
-let eBayFeBest = new eBayApi({
-    appId: process.env.EBAY_APP_ID,
-    certId: process.env.EBAY_CERT_ID,
-    ruName: process.env.EBAY_RUNAME,
-    sandbox: false,
-})
+let eBayAutoParts = initializeEbay()
 
-
-eBayAutoParts.OAuth2.setScope([
-    'https://api.ebay.com/oauth/api_scope',
-    'https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly',
-    'https://api.ebay.com/oauth/api_scope/sell.fulfillment',
-    'https://api.ebay.com/oauth/api_scope/sell.inventory.readonly',
-    'https://api.ebay.com/oauth/api_scope/sell.inventory',
-])
-
-eBayFeBest.OAuth2.setScope([
-    'https://api.ebay.com/oauth/api_scope',
-    'https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly',
-    'https://api.ebay.com/oauth/api_scope/sell.fulfillment',
-    'https://api.ebay.com/oauth/api_scope/sell.inventory.readonly',
-    'https://api.ebay.com/oauth/api_scope/sell.inventory',
-])
+let eBayFeBest = initializeEbay()
 
 
 // Function to fetch eBay orders
@@ -87,7 +61,7 @@ async function fetchEBayOrders() {
         //     filter: 'creationdate:[' + new Date(lastAPICallTime).toISOString() + '..]',
         // });
         const result = await eBayAutoParts.sell.fulfillment.getOrders({
-            filter: 'creationdate:[2023-09-10T11:47:05.000Z..2023-09-10T11:47:05.000Z]',
+            filter: 'creationdate:[2023-09-20T11:47:05.000Z..2023-09-21T11:47:05.000Z]',
         });
 
         // Implement order processing logic here
@@ -118,119 +92,18 @@ async function fetchEBayOrders() {
     }
 }
 
-// Function to update eBay item stock based on item number
-async function updateItemStock(itemNumber, newQuantity) {
-    try {
-        // Make API request to update item stock using eBay Inventory API
-        const response = await axios.put(
-            `${eBayApiBaseUrl}/sell/inventory/v1/inventory_item/${itemNumber}`,
-            {
-                quantity: newQuantity,
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${eBayAccessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
+// Function to post new orders of ebay to Datapel WMS
 
-        // Handle and process the response (check for success)
-
-        console.log(`Updated stock for eBay item ${itemNumber} to ${newQuantity}.`);
-    } catch (error) {
-        console.error(`Error updating stock for eBay item ${itemNumber}:`, error);
-    }
+const postNewOrdersToWMS = async () => {
+    console.log('post new orders to WMS');
 }
 
+// Function to sync Stock changes of DataPel WMS to eBay
 
-const getAuthToken =  (store) => {
-    return new Promise(async (resolve, reject)=>{
-        try {
-
-            if( store == 'AutoParts' ) {
-                // Step 1: Obtain a user access token from MongoDB database
-                const property = await Property.findOne({title: 'eBayProAutoPartsAccessToken'});
-
-                let token = null;
-
-                if (property && property.description) {
-                    // Here need to check if the token is expired
-                    token = JSON.parse(property.description);
-                    resolve(token);
-                    return;
-                }
-
-                // Step 2: Obtain an Authorization URL and Code
-
-                const url = await eBayAutoParts.OAuth2.generateAuthUrl();
-
-                console.log('Authorize this app by visiting this url for AutoParts Store:', url);
-
-                const rl = readline.createInterface({
-                    input: process.stdin,
-                    output: process.stdout,
-                });
-
-                rl.question('Enter the code from that page here (from the url query ?code=) : ', async (code) => {
-                    rl.close();
-                    code = decodeURIComponent(code);
-                    console.log('Enter code', code);
-                    const token = await eBayAutoParts.OAuth2.getToken(code);
-                    await Property.updateOne({title: 'eBayProAutoPartsAccessToken'}, {description: JSON.stringify(token)}, {upsert: true});
-                    resolve(token)
-                });
-
-                writeLog({
-                    type: 'info',
-                    description : 'eBayProAutoPartsAccessToken is regenerated!',
-                    date: new Date().toISOString()
-                })
-
-            } else{
-
-                // Step 1: Obtain a user access token from MongoDB database
-                const property = await Property.findOne({title: 'eBayProFeBestAccessToken'});
-                let token = null;
-
-                if (property && property.description) {
-                    // Here need to check if the token is expired
-                    token = JSON.parse(property.description);
-                    resolve(token);
-                    return;
-                }
-
-                // Step 2: Obtain an Authorization URL and Code
-
-                const url = await eBayFeBest.OAuth2.generateAuthUrl();
-                console.log('Authorize this app by visiting this url for FeBest Store:', url);
-
-                const rl = readline.createInterface({
-                    input: process.stdin,
-                    output: process.stdout,
-                });
-
-                rl.question('Enter the code from that page here (from the url query ?code=) : ', async (code) => {
-                    rl.close();
-                    code = decodeURIComponent(code);
-                    console.log('Enter code', code);
-                    const token = await eBayFeBest.OAuth2.getToken(code);
-                    await Property.updateOne({title: 'eBayProFeBestAccessToken'}, {description: JSON.stringify(token)}, {upsert: true});
-                    resolve(token)
-                });
-
-                writeLog({
-                    type: 'info',
-                    description : 'eBayProFeBestAccessToken is regenerated!',
-                    date: new Date().toISOString()
-                })
-            }
-        } catch (error) {
-            reject(error.message)
-        }
-    })
-
+const stockSync =  () => {
+    console.log('stock sync');
 }
+
 
 // test function
 const testfunction = () => {
@@ -238,12 +111,20 @@ const testfunction = () => {
 }
 
 // Schedule order fetching (e.g., every 30 minutes)
-const run_scheduler = () => {
+const run_scheduler = async () => {
     // test the schedule:
-    // console.log('run scheduler');
-    // schedule.scheduleJob('*/30 * * * * *', testfunction);
-    // schedule.scheduleJob('*/30 * * * * *', fetchEBayOrders);
-    // fetchEBayOrders();
+
+
+    let time_at = '00:00:01';
+
+    // Get the Run Time from Database Setting
+    let runTime = await Property.findOne({title: 'runTime'});
+    if (runTime && runTime.description !== null) {
+        time_at = runTime.description;
+    }
+    console.log(time_at);
+    schedule.scheduleJob(timeConverter(time_at), postNewOrdersToWMS);
+    schedule.scheduleJob(timeConverter(time_at), stockSync);
 }
 
 
