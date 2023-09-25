@@ -1,4 +1,5 @@
 import Autoplus from "../mongodb/models/autoplus.js";
+import mongoose from "mongoose";
 
 
 const getAllAutopluses = async (req, res) => {
@@ -121,10 +122,24 @@ const deleteAutoplus = async (req, res) => {
     }
 };
 
+const deleteAllAutoplus = async (req, res) => {
+    try {
+        const { verify } = req.body;
+
+        if( verify !== process.env.KEY ) throw new Error("Invalid Request");
+        await mongoose.connection.collection("autoplus").drop();
+        res.status(200).json({ message: "Autoplus deleted successfully" });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 export {
     getAllAutopluses,
     getAutoplusDetail,
     createAutoplus,
     updateAutoplus,
     deleteAutoplus,
+    deleteAllAutoplus,
 };

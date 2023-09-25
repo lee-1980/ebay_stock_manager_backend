@@ -3,6 +3,7 @@ import express from "express";
 import {
     createAutoplus,
     deleteAutoplus,
+    deleteAllAutoplus,
     getAllAutopluses,
     getAutoplusDetail,
     updateAutoplus,
@@ -15,5 +16,6 @@ router.route("/:id").get(getAutoplusDetail);
 router.route("/").post(createAutoplus);
 router.route("/:id").patch(updateAutoplus);
 router.route("/:id").delete(deleteAutoplus);
+router.route("/deleteAll").post(deleteAllAutoplus);
 
 export default router;

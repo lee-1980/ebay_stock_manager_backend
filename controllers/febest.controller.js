@@ -1,5 +1,5 @@
 import Febest from "../mongodb/models/febest.js";
-
+import mongoose from "mongoose";
 
 const getAllFebests = async (req, res) => {
 
@@ -121,10 +121,24 @@ const deleteFebest = async (req, res) => {
     }
 };
 
+const deleteAllFebests = async (req, res) => {
+    try {
+        const { verify } = req.body;
+
+        if( verify !== process.env.KEY ) throw new Error("Invalid Request");
+        await mongoose.connection.collection("febests").drop();
+        res.status(200).json({ message: "All Febests deleted successfully" });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 export {
     getAllFebests,
     getFebestDetail,
     createFebest,
     updateFebest,
     deleteFebest,
+    deleteAllFebests
 };

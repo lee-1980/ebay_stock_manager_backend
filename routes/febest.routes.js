@@ -3,6 +3,7 @@ import express from "express";
 import {
     createFebest,
     deleteFebest,
+    deleteAllFebests,
     getAllFebests,
     getFebestDetail,
     updateFebest,
@@ -15,5 +16,6 @@ router.route("/:id").get(getFebestDetail);
 router.route("/").post(createFebest);
 router.route("/:id").patch(updateFebest);
 router.route("/:id").delete(deleteFebest);
+router.route("/deleteAll").post(deleteAllFebests);
 
 export default router;
