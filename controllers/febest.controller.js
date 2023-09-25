@@ -11,20 +11,29 @@ const getAllFebests = async (req, res) => {
         item_number_like = "",
     } = req.query;
 
-    const query = {};
+    let query = {};
 
 
     if (item_number_like) {
-        query.item_number = { $regex: item_number_like, $options: "i" };
+
+        query = {
+            $or: [
+                {
+                    csku: {$regex: item_number_like, $options: "i"}
+                },
+                {
+                    item_number: {$regex: item_number_like, $options: "i"}
+                }
+            ]
+        }
     }
 
     try {
         const count = await Febest.countDocuments({ query });
-
         const properties = await Febest.find(query)
             .limit(_end - _start)
             .skip(_start)
-            .sort({ [_sort]: _order });
+            .sort({ ['item_number']: 'asc' });
 
         res.header("x-total-count", count);
         res.header("Access-Control-Expose-Headers", "x-total-count");
@@ -57,13 +66,15 @@ const createFebest = async (req, res) => {
             item_number,
             csku,
             fsku,
+            combined
         } = req.body;
 
 
         await Febest.create({
             item_number,
             csku,
-            fsku
+            fsku,
+            combined
         });
 
         res.status(200).json({ message: "Febest created successfully" });
@@ -75,7 +86,7 @@ const createFebest = async (req, res) => {
 const updateFebest = async (req, res) => {
     try {
         const { id } = req.params;
-        const { item_number, csku, fsku} =
+        const { item_number, csku, fsku, combined} =
             req.body;
 
         await Febest.findByIdAndUpdate(
@@ -83,7 +94,8 @@ const updateFebest = async (req, res) => {
             {
                 item_number,
                 csku,
-                fsku
+                fsku,
+                combined
             },
         );
 

@@ -31,10 +31,10 @@ const startServer = async () => {
     try {
 
         connectDB(process.env.MONGODB_URL);
-        run_scheduler();
-        app.listen(8080, () =>
-            console.log("Server started on port http://localhost:8080"),
-        );
+        app.listen(8080, () =>{
+            run_scheduler();
+            console.log("Server started on port http://localhost:8080");
+        });
 
     } catch (error) {
         console.log(error);
