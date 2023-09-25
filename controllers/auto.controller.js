@@ -11,19 +11,30 @@ const getAllAutopluses = async (req, res) => {
         item_number_like = "",
     } = req.query;
 
-    const query = {};
+    let query = {};
 
     if (item_number_like) {
-        query.item_number = { $regex: item_number_like, $options: "i" };
+
+        query = {
+            $or: [
+                {
+                    csku: {$regex: item_number_like, $options: "i"}
+                },
+                {
+                    item_number: {$regex: item_number_like, $options: "i"}
+                }
+            ]
+        }
     }
 
     try {
+
         const count = await Autoplus.countDocuments({ query });
 
         const properties = await Autoplus.find(query)
             .limit(_end - _start)
             .skip(_start)
-            .sort({ [_sort]: _order });
+            .sort({ ['item_number']: 'asc' });
 
         res.header("x-total-count", count);
         res.header("Access-Control-Expose-Headers", "x-total-count");
@@ -56,13 +67,16 @@ const createAutoplus = async (req, res) => {
             item_number,
             csku,
             fsku,
+            combined,
         } = req.body;
 
         await Autoplus.create({
             item_number,
             csku,
-            fsku
+            fsku,
+            combined
         });
+
 
         res.status(200).json({ message: "Autoplus created successfully" });
     } catch (error) {
@@ -73,7 +87,7 @@ const createAutoplus = async (req, res) => {
 const updateAutoplus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { item_number, csku, fsku} =
+        const { item_number, csku, fsku, combined} =
             req.body;
 
         await Autoplus.findByIdAndUpdate(
@@ -81,7 +95,8 @@ const updateAutoplus = async (req, res) => {
             {
                 item_number,
                 csku,
-                fsku
+                fsku,
+                combined
             },
         );
         res.status(200).json({ message: "Autoplus updated successfully" });
