@@ -27,8 +27,8 @@ const collectUniqueSKUs = (dataArray, stockObj) => {
         let CustomSKUs = [];
         let subItemStock = stockObj;
 
-
         dataArray.forEach((item, index) => {
+
             let fSkuArray = {
                 sku: [],
                 stock: []
