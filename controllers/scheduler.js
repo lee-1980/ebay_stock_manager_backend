@@ -18,8 +18,8 @@ const postNewOrdersToWMS = () => {
 
             // Calculate the orders to be posted to Datapel WMS
 
-            // Post the orders to Datapel WMS
 
+            // Post the orders to Datapel WMS
             resolve();
         }
         catch (e) {
@@ -46,9 +46,7 @@ const stockSync =  () => {
             let calculatedStockChanges = await calculateStockChanges(stockChanges);
 
             // Post the Stock Changes to eBay
-
             await postStockChangesToEbay(calculatedStockChanges);
-
             resolve();
         }
         catch (e) {

@@ -1,57 +1,10 @@
 {
-  "Sale": {
-    "ShippingMethod": "Best Way",
-    "MYOBCardName": "test",
-    "Company_ID": "DATAPEL",
-    "StoreCode": "MELB",
-    "PostingDate": "2013-11-28T15:56:49 10:00",
-    "TransID": "EA009017",
-    "transDate": "2013-11-28T15:57:03 10:00",
-    "Saletype": 0,
-    "status":0,
-    "SalesPerson": "Zdraveski, Steven",
-    "CustomerID": "Sep-27-2011-EB2",
-    "TransactionTime": "2011-09-27T15:56:49 10:00",
-    "OriginalTransID": "Test3652",
-    "Special1":"D1=D2= D3= D4= D5= D6= D7=",
-    "Special2": "Sep-27-2011-EB2",
-    "Special3": "",
-    "SaleLines": [
-      {
-        "SaleLineNo": "0",
-        "SKU": "AAP5025",
-        "SaleQty": "1",
-        "SaleUnitAmountIncTax": "100.00",
-        "SaleTaxRate": "10.00",
-        "SaleTaxUnitAmount": "9.09",
-        "SKUDescription": "JSON Accessories",
-        "TaxCode": "GST"
-      },
-      {
-
-        "SaleLineNo": "1",
-        "SKU": "C-Hsc",
-        "SaleQty": "1",
-        "SaleUnitAmountIncTax": "100.00",
-        "SaleTaxRate": "10.00",
-        "SaleTaxUnitAmount": "9.09",
-        "SKUDescription": "2nd Line",
-        "TaxCode": "GST"
-      }
-    ]
-  },
-  "Payment":
-  {
-    "TenderLine": "1",
-    "TenderAmount": "200.00",
-    "CurrencyCode": "A"
-  },
-  "Customer": {
-    "EmailAddress": "rmhill@gmail.com",
-    "ShipToName": "EcoIvanhoe",
-    "ShipToAddress1": "291 Oxford St",
-    "ShipToAddress2": "",
-    "ShipToSuburb": "Leederville",
-    "ShipToPostCode": "WA 6007"
-  }
+  "count": 1,
+  "salesQueue": [
+    {
+      "nameOfFile": "QID-228465CF-1C6E-408B-8BEF-45EB1757755D.xml",
+      "data": "<NewDataSet><tREMOTETransHeader><DTD>MAGENTO</DTD><RevisionNumber>1</RevisionNumber><Company_ID>DATAPEL</Company_ID><StoreCode>MELB</StoreCode><PostingDate>2023-06-15 09:40:58</PostingDate><Salesperson>Zdraveski, Steven</Salesperson><SaleType>O</SaleType><Status>O</Status><MYOBCardName>Febest.com.au Web Order</MYOBCardName><OriginalTransID>Test3652</OriginalTransID><Sent2HostDateTime>2020-08-14T12:00:00+</Sent2HostDateTime><Special2>1810002221</Special2><UDF2>M[1500003652]</UDF2><ShipNote>2023-06-15 09:40:58</ShipNote><ShippingNote>2023-06-15 09:40:58</ShippingNote><Priority>NORMAL</Priority><Notes></Notes><Paymentnotes>paymentnotes</Paymentnotes><SaleNote>Email: z.hussain.svt@gmail.comTransID: </SaleNote><DiscountAmount>0.0000</DiscountAmount></tREMOTETransHeader><tREMOTETransSaleTenders><TenderType>Direct Payment</TenderType><TenderAmount>92.5500</TenderAmount><CurrencyCode>AUD</CurrencyCode></tREMOTETransSaleTenders><tREMOTETransCustomer><ShipToName>Hussain Alaradi</ShipToName><ShipToAddress1>Home 531, Road 4221</ShipToAddress1><ShipToAddress2></ShipToAddress2><ShipToSuburb>Manama</ShipToSuburb><ShipToPostCode>, +973, Bahrain</ShipToPostCode><PhoneNo1>66994669</PhoneNo1><EmailAddress>z.hussain.svt@gmail.com</EmailAddress></tREMOTETransCustomer><tREMOTETransSaleLines><SaleLineNo>0</SaleLineNo><SKU>TAB-575</SKU><SaleUnitQty>2</SaleUnitQty><SaleUnitDiscount>0</SaleUnitDiscount><SaleUnitAmountExcTax>0</SaleUnitAmountExcTax><SaleUnitAmountIncTax>27.4</SaleUnitAmountIncTax><SalePriceByHost>N</SalePriceByHost><SKUDescription>TAB-575 - FEBEST ARM BUSHING REAR LOWER ARM</SKUDescription><SaleTaxCode>EXP</SaleTaxCode><SaleTaxByHost>N</SaleTaxByHost><LineNote>TAB-575 - FEBEST ARM BUSHING REAR LOWER ARM</LineNote></tREMOTETransSaleLines><tREMOTETransSaleLines><SaleLineNo>1</SaleLineNo><SKU>FREIGHT</SKU><SaleUnitQty>1</SaleUnitQty><SaleUnitDiscount>0</SaleUnitDiscount><SaleUnitAmountExcTax>0</SaleUnitAmountExcTax><SaleUnitAmountIncTax>37.75</SaleUnitAmountIncTax><SalePriceByHost>N</SalePriceByHost><SKUDescription>International Standard Post 0</SKUDescription><SaleTaxCode>FRE</SaleTaxCode><SaleTaxByHost>N</SaleTaxByHost></tREMOTETransSaleLines></NewDataSet>\r\n"
+    }
+  ],
+  "exception": null
 }

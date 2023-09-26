@@ -34,11 +34,18 @@ const collectUniqueSKUs = (dataArray, stockObj) => {
                 stock: []
             };
 
-            item.fsku.split('|').forEach((subItem) => {
-                if(!subItemStock.hasOwnProperty(subItem.split(';')[0])) subItemStock[subItem.split(';')[0]] = 0
-                fSkuArray.sku.push(subItem.split(';')[0]);
-                fSkuArray.stock.push(subItem.split(';')[1]);
-            });
+            try {
+                item.fsku.split('|').forEach((subItem) => {
+                    if(subItem){
+                        if(!subItemStock.hasOwnProperty(subItem.split(';')[0])) subItemStock[subItem.split(';')[0]] = 0
+                        fSkuArray.sku.push(subItem.split(';')[0]);
+                        fSkuArray.stock.push(subItem.split(';')[1]);
+                    }
+                });
+            }
+            catch (e) {
+                console.log(e.message)
+            }
 
             CustomSKUs.push({
                 item_number: item.item_number,
@@ -52,7 +59,6 @@ const collectUniqueSKUs = (dataArray, stockObj) => {
             });
         })
     })
-
 
 }
 
