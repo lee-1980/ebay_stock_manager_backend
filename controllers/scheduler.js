@@ -71,8 +71,6 @@ const runner = async () => {
     }
 }
 
-
-
 // Schedule order fetching (e.g., every 30 minutes)
 const run_scheduler = async () => {
     let time_at = '00:00:01';

@@ -325,8 +325,12 @@ export const postOrders = (orders) => {
                     }
                 }
                 // console.log(ebaySalesOrderData, store.title)
-                let response = await postSalesOrder(ebaySalesOrderData)
-                console.log(response.data, store.title)
+                if(saleLines.length > 0){
+                    let response = await postSalesOrder(ebaySalesOrderData)
+                    console.log(response.data, store.title)
+                }else{
+                    console.log('No orders to post', store.title)
+                }
             }
             resolve()
         }
@@ -353,8 +357,8 @@ export const postStockChangesToEbay = (stockChanges) => {
             // Febest
             let febestData = await getRows(Febest, { $or : SKUList }, stockObj)
 
+            console.log(stockChanges.length, autoPartsData.length, febestData.length, 'UpToDate Stock Data')
             // Loop ebay stores
-
             for (const store of storeList) {
 
                 ebayStores[store.title] = {
@@ -380,6 +384,7 @@ export const postStockChangesToEbay = (stockChanges) => {
                 })
                 // handle data and post to ebay
                 let dataSource = store.title === 'AutoParts' ? autoPartsData : febestData;
+                let dataLength = dataSource.length;
                 let rearrangedStockChanges = regroupArray(dataSource);
 
                 for ( let i = 0 ; i < rearrangedStockChanges.length ; i++ ) {
@@ -404,11 +409,11 @@ export const postStockChangesToEbay = (stockChanges) => {
                 }
 
                 // Implement order processing logic here
-                console.log(`Posted ${dataSource.length} eBay orders From ${store.title} Store.`);
+                console.log(`Posted ${dataLength} eBay orders From ${store.title} Store.`);
 
                 writeLog({
                     type: 'info',
-                    description : ` Post ${dataSource.length} Items' stock Change to ${store.title} store`,
+                    description : ` Post ${dataLength} Items' stock Change to ${store.title} store`,
                     date: new Date().toISOString()
                 })
             }
