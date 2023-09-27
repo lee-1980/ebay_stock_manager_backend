@@ -1,6 +1,7 @@
 import Property from "../mongodb/models/property.js";
 import febest from "../mongodb/models/febest.js";
 import autoplus from "../mongodb/models/autoplus.js";
+import dayjs from "dayjs";
 
 import * as dotenv from "dotenv";
 import schedule from "node-schedule";
@@ -16,14 +17,17 @@ const getAllProperties = async (req, res) => {
         const autoplusCount = await autoplus.countDocuments();
         const settingSystemOnOff = await Property.findOne({ title : "systemOnOff" });
         const settingRunTime = await Property.findOne({ title : "runTime" });
+        const lastSync = await Property.findOne({ title : "lastAPICallTime" });
         const serverOn = settingSystemOnOff ? (settingSystemOnOff.description == 'false' ? false : true) : false;
         const runTime = settingRunTime ? settingRunTime.description : '00:00:01';
+        const lastSyncTime = lastSync ?dayjs(lastSync.description).format("YYYY-MM-DD HH:mm:ss") : '1970-01-01 00:00:01';
 
         res.status(200).json({
             febestCount,
             autoplusCount,
             serverOn,
-            runTime
+            runTime,
+            lastSyncTime
         });
 
     } catch (error) {

@@ -209,13 +209,12 @@ export const fetchEBayOrders = async () => {
                 date.setDate(date.getDate() - 1);
                 lastAPICallTime = date;
             } else {
-                lastAPICallTime = '2023-09-27T15:15:22.000Z'
+                lastAPICallTime = lastAPICallRecord.description;
             }
 
             let ebayStores = {};
             let ebayOrders = {}
             // Loop ebay stores
-
 
             for (const store of storeList) {
 
@@ -224,6 +223,7 @@ export const fetchEBayOrders = async () => {
                     token: '',
                     result: []
                 }
+
                 // Authenticate and obtain anc access token
                 ebayStores[store.title].token = await getAuthToken(ebayStores[store.title].instance, store.storeTokenName, store.title);
 
@@ -324,8 +324,9 @@ export const postOrders = (orders) => {
                         tREMOTETransSaleLines: saleLines
                     }
                 }
-                console.log(ebaySalesOrderData, store.title)
-                // let response = await postSalesOrder(ebaySalesOrderData)
+                // console.log(ebaySalesOrderData, store.title)
+                let response = await postSalesOrder(ebaySalesOrderData)
+                console.log(response.data, store.title)
             }
             resolve()
         }
