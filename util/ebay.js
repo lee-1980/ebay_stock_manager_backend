@@ -25,6 +25,8 @@ const getRows = (model, condition, reference) => {
     return new Promise((resolve, reject) => {
         model.find(condition, (err, rows) => {
             if (err) reject(err);
+            if (rows === undefined|| rows.length === 0) resolve([]);
+
             let autoPartsData = [];
             rows.forEach( (item, index) => {
                 autoPartsData.push({
@@ -34,7 +36,7 @@ const getRows = (model, condition, reference) => {
                 });
                 if (index === rows.length - 1) resolve(autoPartsData);
             });
-            if (rows.length === 0) resolve([]);
+
         })
     })
 }
@@ -352,10 +354,10 @@ export const postStockChangesToEbay = (stockChanges) => {
                 return { 'csku' : item.SKU }
             });
             // AutoParts
-            let autoPartsData = await getRows(Autoplus, { $or : SKUList }, stockObj)
+            let autoPartsData = stockChanges.length? await getRows(Autoplus, { $or : SKUList }, stockObj) : []
 
             // Febest
-            let febestData = await getRows(Febest, { $or : SKUList }, stockObj)
+            let febestData = stockChanges.length? await getRows(Febest, { $or : SKUList }, stockObj): []
 
             console.log(stockChanges.length, autoPartsData.length, febestData.length, 'UpToDate Stock Data')
             // Loop ebay stores
@@ -409,11 +411,11 @@ export const postStockChangesToEbay = (stockChanges) => {
                 }
 
                 // Implement order processing logic here
-                console.log(`Posted ${dataLength} eBay orders From ${store.title} Store.`);
+                console.log(`Posted ${dataLength} Items' stock Change To ${store.title} Store.`);
 
                 writeLog({
                     type: 'info',
-                    description : ` Post ${dataLength} Items' stock Change to ${store.title} store`,
+                    description : ` Posted ${dataLength} Items' stock Change to ${store.title} store.`,
                     date: new Date().toISOString()
                 })
             }
