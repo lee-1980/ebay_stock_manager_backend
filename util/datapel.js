@@ -226,6 +226,7 @@ export const getAuthToken = () => {
 export const calculateStockChanges = (stockChanges) => {
     return new Promise(async (resolve, reject) => {
         try {
+            if(stockChanges.length === 0) resolve([]);
             let updatedStockChanges = stockChanges;
 
             // Get the Custom SKU combination from the database
