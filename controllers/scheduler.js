@@ -3,7 +3,7 @@ import schedule  from 'node-schedule';
 
 import Property from "../mongodb/models/property.js";
 import { writeLog } from "./log.controller.js";
-import { initializeEbay, fetchEBayOrders, postStockChangesToEbay} from "../util/ebay.js";
+import { fetchEBayOrders, postStockChangesToEbay, postOrders} from "../util/ebay.js";
 import { timeConverter} from "../util/timeConverter.js";
 import { getStockChanges , calculateStockChanges} from "../util/datapel.js";
 
@@ -14,11 +14,9 @@ const postNewOrdersToWMS = () => {
     return new Promise(async (resolve)=> {
         try{
             // Get the eBay Orders
-            let ebayStores = await fetchEBayOrders();
-
-            // Calculate the orders to be posted to Datapel WMS
-
-
+            let ebayOrders = await fetchEBayOrders();
+            // Calculate the orders for Custom Label Kits to be posted to Datapel WMS
+            await postOrders(ebayOrders);
             // Post the orders to Datapel WMS
             resolve();
         }

@@ -84,7 +84,7 @@ const calculateCombinedItemStockChanges = (CustomSKUs, subItemCount) => {
             if (CustomSKUs.length === 0) resolve(combinedItemStockChanges)
         }
         catch (e) {
-            console.log(e.message)
+            console.log(e.message, 'calculateCombinedItemStockChanges')
             reject(e.message)
         }
     })
@@ -104,7 +104,7 @@ export const getAuthTokenFromAPI = () => {
             resolve(response.data[0].token)
         }
         catch (e) {
-            console.log(e.message)
+            console.log(e.message, 'getAuthTokenFromAPI')
             reject(e.message)
         }
     })
@@ -127,7 +127,30 @@ export const getItemStockChanges = (url) => {
             resolve(response)
         }
         catch (e) {
-            console.log(e.message)
+            console.log(e.message, 'getItemStockChanges')
+            reject(e.message)
+        }
+    })
+}
+
+export const postSalesOrder = (data) => {
+    return new Promise(async (resolve, reject)=>{
+        try{
+            const credential = new Buffer.from(process.env.DATEPEL_USERNAME + ':' + process.env.DATEPEL_PASSWORD).toString('base64');
+
+            const authToken = await getAuthToken();
+
+            const response = await axios.post('https://febest.datapelapi.com/JSON/salesqueue?filter~',  JSON.stringify(data),{
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': credential,
+                    'auth_token': authToken,
+                }
+            })
+            resolve(response)
+        }
+        catch (e) {
+            console.log(e.message, 'postSalesOrder')
             reject(e.message)
         }
     })
@@ -155,7 +178,7 @@ const getSubItemStocksFromAPI = (skuObj) => {
         }
         catch (e) {
 
-            console.log(e.message)
+            console.log(e.message, 'getSubItemStocksFromAPI')
             reject(e.message)
 
         }
@@ -194,7 +217,7 @@ export const getAuthToken = () => {
 
         }
         catch (e) {
-            console.log(e.message)
+            console.log(e.message, 'getAuthToken DataPel')
             reject(e.message)
         }
     })
@@ -250,7 +273,7 @@ export const calculateStockChanges = (stockChanges) => {
             resolve(updatedStockChanges);
         }
         catch (e) {
-            console.log(e.message)
+            console.log(e.message, 'calculateStockChanges')
             reject(e.message)
         }
     })
@@ -291,7 +314,7 @@ export const getStockChanges = () => {
             }
         }
         catch (e) {
-            console.log(e.message)
+            console.log(e.message, 'getStockChanges')
             reject(e.message)
         }
     })

@@ -1,10 +1,106 @@
 {
-  "count": 1,
-  "salesQueue": [
+  "orderId": "03-10592-35248",
+  "legacyOrderId": "263133778190-3031905782016",
+  "creationDate": "2023-09-27T00:14:34.000Z",
+  "lastModifiedDate": "2023-09-27T00:16:32.000Z",
+  "orderFulfillmentStatus": "NOT_STARTED",
+  "orderPaymentStatus": "PAID",
+  "sellerId": "autoplusparts",
+  "buyer": {
+    "username": "braxt-joh",
+    "taxAddress": { "stateOrProvince": "VIC", "postalCode": "3026", "countryCode": "AU" },
+    "buyerRegistrationAddress": {
+      "fullName": "John Braxton",
+      "contactAddress": {
+        "addressLine1": "6 Apsley Vista",
+        "city": "Derrimut",
+        "stateOrProvince": "VIC",
+        "postalCode": "3026",
+        "countryCode": "AU"
+      },
+      "primaryPhone": { "phoneNumber": "0423612039" },
+      "email": "608b92d3a41e6e1cc529@members.ebay.com"
+    }
+  },
+  "pricingSummary": {
+    "priceSubtotal": { "value": "10.66", "currency": "AUD" },
+    "deliveryCost": { "value": "11.15", "currency": "AUD" },
+    "total": { "value": "21.81", "currency": "AUD" }
+  },
+  "cancelStatus": { "cancelState": "NONE_REQUESTED", "cancelRequests": [] },
+  "paymentSummary": {
+    "totalDueSeller": { "value": "18.33", "currency": "AUD" },
+    "refunds": [],
+    "payments": [
+      {
+        "paymentMethod": "EBAY",
+        "paymentReferenceId": "420004_S",
+        "paymentDate": "2023-09-27T00:14:33.563Z",
+        "amount": { "value": "18.33", "currency": "AUD" },
+        "paymentStatus": "PAID"
+      }
+    ]
+  },
+  "fulfillmentStartInstructions": [
     {
-      "nameOfFile": "QID-228465CF-1C6E-408B-8BEF-45EB1757755D.xml",
-      "data": "<NewDataSet><tREMOTETransHeader><DTD>MAGENTO</DTD><RevisionNumber>1</RevisionNumber><Company_ID>DATAPEL</Company_ID><StoreCode>MELB</StoreCode><PostingDate>2023-06-15 09:40:58</PostingDate><Salesperson>Zdraveski, Steven</Salesperson><SaleType>O</SaleType><Status>O</Status><MYOBCardName>Febest.com.au Web Order</MYOBCardName><OriginalTransID>Test3652</OriginalTransID><Sent2HostDateTime>2020-08-14T12:00:00+</Sent2HostDateTime><Special2>1810002221</Special2><UDF2>M[1500003652]</UDF2><ShipNote>2023-06-15 09:40:58</ShipNote><ShippingNote>2023-06-15 09:40:58</ShippingNote><Priority>NORMAL</Priority><Notes></Notes><Paymentnotes>paymentnotes</Paymentnotes><SaleNote>Email: z.hussain.svt@gmail.comTransID: </SaleNote><DiscountAmount>0.0000</DiscountAmount></tREMOTETransHeader><tREMOTETransSaleTenders><TenderType>Direct Payment</TenderType><TenderAmount>92.5500</TenderAmount><CurrencyCode>AUD</CurrencyCode></tREMOTETransSaleTenders><tREMOTETransCustomer><ShipToName>Hussain Alaradi</ShipToName><ShipToAddress1>Home 531, Road 4221</ShipToAddress1><ShipToAddress2></ShipToAddress2><ShipToSuburb>Manama</ShipToSuburb><ShipToPostCode>, +973, Bahrain</ShipToPostCode><PhoneNo1>66994669</PhoneNo1><EmailAddress>z.hussain.svt@gmail.com</EmailAddress></tREMOTETransCustomer><tREMOTETransSaleLines><SaleLineNo>0</SaleLineNo><SKU>TAB-575</SKU><SaleUnitQty>2</SaleUnitQty><SaleUnitDiscount>0</SaleUnitDiscount><SaleUnitAmountExcTax>0</SaleUnitAmountExcTax><SaleUnitAmountIncTax>27.4</SaleUnitAmountIncTax><SalePriceByHost>N</SalePriceByHost><SKUDescription>TAB-575 - FEBEST ARM BUSHING REAR LOWER ARM</SKUDescription><SaleTaxCode>EXP</SaleTaxCode><SaleTaxByHost>N</SaleTaxByHost><LineNote>TAB-575 - FEBEST ARM BUSHING REAR LOWER ARM</LineNote></tREMOTETransSaleLines><tREMOTETransSaleLines><SaleLineNo>1</SaleLineNo><SKU>FREIGHT</SKU><SaleUnitQty>1</SaleUnitQty><SaleUnitDiscount>0</SaleUnitDiscount><SaleUnitAmountExcTax>0</SaleUnitAmountExcTax><SaleUnitAmountIncTax>37.75</SaleUnitAmountIncTax><SalePriceByHost>N</SalePriceByHost><SKUDescription>International Standard Post 0</SKUDescription><SaleTaxCode>FRE</SaleTaxCode><SaleTaxByHost>N</SaleTaxByHost></tREMOTETransSaleLines></NewDataSet>\r\n"
+      "fulfillmentInstructionsType": "SHIP_TO",
+      "minEstimatedDeliveryDate": "2023-10-01T13:00:00.000Z",
+      "maxEstimatedDeliveryDate": "2023-10-02T13:00:00.000Z",
+      "ebaySupportedFulfillment": false,
+      "shippingStep": {
+        "shipTo": {
+          "fullName": "John Braxton",
+          "contactAddress": {
+            "addressLine1": "ebay:c3vqr9r",
+            "addressLine2": "6 Apsley Vsta",
+            "city": "Derrimut",
+            "stateOrProvince": "VIC",
+            "postalCode": "3026",
+            "countryCode": "AU"
+          },
+          "primaryPhone": { "phoneNumber": "423612039" },
+          "email": "608b92d3a41e6e1cc529@members.ebay.com"
+        },
+        "shippingCarrierCode": "Australia Post",
+        "shippingServiceCode": "AU_Regular"
+      }
+    }
+  ] ,
+  "fulfillmentHrefs": [],
+  "lineItems": [
+    {
+      "lineItemId": "10058370880803",
+      "legacyItemId": "263133778190",
+      "sku": "SZAB-004",
+      "title": "Fits SUZUKI VITARA SE413/SE416 - Rubber Suspension Bush For Lateral Control Arm",
+      "lineItemCost": { "value": "10.66", "currency": "AUD" },
+      "quantity": 1,
+      "soldFormat": "FIXED_PRICE",
+      "listingMarketplaceId": "EBAY_AU",
+      "purchaseMarketplaceId": "EBAY_AU",
+      "lineItemFulfillmentStatus": "NOT_STARTED",
+      "total": { "value": "21.81", "currency": "AUD" },
+      "deliveryCost": {
+        "shippingCost": { "value": "10.6", "currency": "AUD" },
+        "handlingCost": { "value": "0.55", "currency": "AUD" }
+      },
+      "appliedPromotions": [],
+      "taxes": [],
+      "properties": { "buyerProtection": true },
+      "lineItemFulfillmentInstructions": {
+        "minEstimatedDeliveryDate": "2023-10-01T13:00:00.000Z",
+        "maxEstimatedDeliveryDate": "2023-10-02T13:00:00.000Z",
+        "shipByDate": "2023-09-28T13:59:59.000Z",
+        "guaranteedDelivery": false
+      },
+      "itemLocation": {
+        "location": "Melbourne, Australia",
+        "countryCode": "AU",
+        "postalCode": "3061"
+      }
     }
   ],
-  "exception": null
+  "salesRecordReference": "67663",
+  "totalFeeBasisAmount": { "value": "21.81", "currency": "AUD" },
+  "totalMarketplaceFee": { "value": "3.48", "currency": "AUD" }
 }

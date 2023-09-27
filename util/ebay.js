@@ -6,6 +6,7 @@ import Febest from "../mongodb/models/febest.js";
 import readline from "readline";
 import { writeLog } from "../controllers/log.controller.js";
 import { storeList } from "./constant.js";
+import {postSalesOrder} from "./datapel.js";
 
 dotenv.config();
 
@@ -38,6 +39,85 @@ const getRows = (model, condition, reference) => {
     })
 }
 
+// Prepare SalesLine
+const getSaleLinesPerOrder = (lineItems, saleReference) => {
+    return new Promise((resolve) => {
+        let saleLines = [];
+        if (!Array.isArray(lineItems) || lineItems.length === 0) resolve(saleLines);
+        lineItems.forEach( (item, index) => {
+            try{
+                saleLines.push({
+                    "SKU": item.sku,
+                    "SaleUnitQty": item.quantity,
+                    "SaleTaxByHost": "N",
+                    "SalePriceByHost": "N",
+                    "SaleTaxCode": "GST",
+                    "SaleUnitAmountIncTax": item.lineItemCost.value,
+                    "SaleTaxRate": 10.00,
+                    // need to get the price without tax, so divide by 1.1 and get the value until decimal digit 2
+                    "SaleUnitAmountExcTax": (parseFloat(item.lineItemCost.value) / 1.1).toFixed(2),
+                    "SaleTaxUnitAmount": (parseFloat(item.lineItemCost.value) - (parseFloat(item.lineItemCost.value) / 1.1)).toFixed(2),
+                    "SKUDescription": saleReference,
+                });
+
+                if(lineItems.length - 1 === index) {
+                    resolve(saleLines);
+                }
+            }
+            catch (e) {
+                console.log(e.message)
+            }
+        });
+    })
+}
+
+const addFreightLine = (saleLines) => {
+    return new Promise ((resolve) => {
+        let freightSaleIncTax = 0;
+        let freightSaleExcTax = 0;
+        saleLines.forEach( (item, index) => {
+            freightSaleIncTax += parseFloat(item.SaleUnitAmountIncTax) * item.SaleUnitQty;
+            freightSaleExcTax += parseFloat(item.SaleUnitAmountExcTax) * item.SaleUnitQty;
+            if (index === saleLines.length - 1) {
+                saleLines.push({
+                    "SKU": "FREIGHT",
+                    "SaleUnitQty": 1,
+                    "SaleTaxByHost": "N",
+                    "SalePriceByHost": "N",
+                    "SaleTaxCode": "GST",
+                    "SaleUnitAmountIncTax": freightSaleIncTax.toFixed(2),
+                    "SaleTaxRate": 10.00,
+                    "SaleUnitAmountExcTax": freightSaleExcTax.toFixed(2),
+                    "SaleTaxUnitAmount": (freightSaleIncTax - freightSaleExcTax).toFixed(2),
+                    "SKUDescription": "Combined Freight",
+                });
+                resolve(saleLines);
+            }
+        })
+    })
+}
+
+const getSaleLines = (orderList) => {
+    return new Promise(async (resolve) =>{
+
+        let saleLines = [];
+        if(Array.isArray(orderList) && orderList.length === 0) resolve(saleLines);
+
+        for (let i = 0; i < orderList.length; i++) {
+            try {
+                let saleLinesPerOrder = await getSaleLinesPerOrder(orderList[i].lineItems, orderList[i].salesRecordReference);
+                saleLines = saleLines.concat(saleLinesPerOrder);
+                if (orderList.length - 1 === i) {
+                    saleLines = await addFreightLine(saleLines);
+                    resolve(saleLines);
+                }
+            } catch (e) {
+                console.log(e.message)
+            }
+        }
+
+    })
+}
 
 // initialize ebay Instance
 export const initializeEbay = () => {
@@ -59,6 +139,8 @@ export const initializeEbay = () => {
 
     return ebayInstance;
 }
+
+
 
 // Get the access token from MongoDB database and return it, Else generate a new one
 export const getAuthToken = (instance, tokenName, store) => {
@@ -107,6 +189,7 @@ export const getAuthToken = (instance, tokenName, store) => {
             });
 
         } catch (error) {
+            console.log(error.message, 'getAuthToken')
             reject(error.message)
         }
     })
@@ -126,11 +209,13 @@ export const fetchEBayOrders = async () => {
                 date.setDate(date.getDate() - 1);
                 lastAPICallTime = date;
             } else {
-                lastAPICallTime = lastAPICallRecord.description
+                lastAPICallTime = '2023-09-27T15:15:22.000Z'
             }
 
             let ebayStores = {};
+            let ebayOrders = {}
             // Loop ebay stores
+
 
             for (const store of storeList) {
 
@@ -161,14 +246,31 @@ export const fetchEBayOrders = async () => {
                 // Handle and process the fetched orders (parse response.data)
                 ebayStores[store.title].result = await ebayStores[store.title].instance.sell.fulfillment.getOrders({
                     filter: 'creationdate:[' + new Date(lastAPICallTime).toISOString() + '..]',
+                    limit: 200
                 });
 
+
                 // Implement order processing logic here
-                console.log(`Fetched ${ebayStores[store.title].result.orders.length} eBay orders From ${store.title} Store.`);
+                ebayOrders[store.title] = ebayStores[store.title].result.orders;
+                if(ebayStores[store.title].result.total > 200 ){
+                    let loop = Math.ceil(ebayStores[store.title].result.total / 200);
+                    for(let i = 2; i <= loop; i++){
+                        let orders = await ebayStores[store.title].instance.sell.fulfillment.getOrders({
+                            filter: 'creationdate:[' + new Date(lastAPICallTime).toISOString() + '..]',
+                            limit: 200,
+                            offset: (i-1) * 200,
+                            sort: 'creationdate:asc',
+                        });
+
+                        ebayOrders[store.title] = ebayOrders[store.title].concat(orders.orders);
+                    }
+                }
+
+                console.log(`Fetched ${ebayOrders[store.title].length} eBay orders From ${store.title} Store.`);
 
                 writeLog({
                     type: 'info',
-                    description : ` New ${ebayStores[store.title].result.orders.length} ebay orders from ${store.title} store`,
+                    description : ` New ${ebayOrders[store.title].length} ebay orders from ${store.title} store`,
                     date: new Date().toISOString()
                 })
 
@@ -178,16 +280,61 @@ export const fetchEBayOrders = async () => {
 
             await Property.updateOne({title: 'lastAPICallTime'}, {description: new Date().toISOString()}, {upsert: true});
 
-            resolve(ebayStores);
+            resolve(ebayOrders);
 
         } catch (error) {
-            console.log(error.message)
+            console.log(error.message, 'fetchEBayOrders')
             reject('Error fetching eBay orders:', error.message)
         }
     })
 }
 
+export const postOrders = (orders) => {
+    return new Promise(async (resolve, reject)=>{
+        try{
+            const currentDateTime = new Date();
+            const formattedDate = currentDateTime.toLocaleString("en-US", {month: 'short'}) + '-' + currentDateTime.getDate()  + '-' + currentDateTime.getFullYear()
 
+            for (const store of storeList) {
+                let storeOrders = orders[store.title];
+                // filter orders with Payment status as PAID
+                storeOrders = storeOrders.filter(order => order.orderPaymentStatus === 'PAID');
+
+                // get the saleLines from the orders
+                let saleLines = await getSaleLines(storeOrders);
+                //configure the ebay sales order data object
+                let uniqueSerialNumber = Math.round(Date.now()/1000 * 60);
+                let ebaySalesOrderData = {
+                    NewDataSet : {
+                        tREMOTETransHeader : {
+                            RevisionNumber: '1',
+                            Company_ID : 'DATAPEL',
+                            ShippingMethod : 'Best Way',
+                            StoreCode: 'MELB',
+                            PostingDate: currentDateTime.toISOString(),
+                            Status: 'O',
+                            MYOBCardName: store.myOBName,
+                            Special2: `${formattedDate}-${store.purchaseOrderName}-${uniqueSerialNumber}`,
+                            Notes: `We appreciate your business.`,
+                            ShipNote: `We appreciate your business.`,
+                            ShippingNote: `We appreciate your business.`,
+                            Salesperson: 'Zdraveski, Steven',
+                            Priority: 'NORMAL',
+                        },
+                        tREMOTETransSaleLines: saleLines
+                    }
+                }
+                console.log(ebaySalesOrderData, store.title)
+                // let response = await postSalesOrder(ebaySalesOrderData)
+            }
+            resolve()
+        }
+        catch(error){
+            console.log(error.message, 'postOrders')
+            reject(error.message)
+        }
+    })
+}
 
 export const postStockChangesToEbay = (stockChanges) => {
     return new Promise (async ( resolve , reject) => {
