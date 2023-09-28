@@ -67,7 +67,7 @@ const runner = async () => {
     if (serverStatus && serverStatus.description == 'true') {
 
         await postNewOrdersToWMS();
-        await stockSync();
+        // await stockSync();
     }
 }
 
