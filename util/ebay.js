@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 import Property from "../mongodb/models/property.js";
 import Autoplus from "../mongodb/models/autoplus.js";
 import Febest from "../mongodb/models/febest.js";
+import Order from "../mongodb/models/order.js";
 import readline from "readline";
 import { writeLog } from "../controllers/log.controller.js";
 import { storeList } from "./constant.js";
@@ -14,6 +15,10 @@ dotenv.config();
 let ebayCustomKits = {
     AutoParts: {},
     FeBest: {},
+}
+let ebayOrdersFilter = {
+    AutoParts: [],
+    FeBest: [],
 }
 
 // this function is used to regroup the original array into a new array of sub arrays of 25 items each.
@@ -281,7 +286,18 @@ export const fetchEBayOrders = async () => {
                 lastAPICallTime = date;
             } else {
                 lastAPICallTime = lastAPICallRecord.description;
+                // lastAPICallTime = '2023-09-25 18:41:11';
             }
+            // Get all orders from database which are latest 2 months ago
+            let d = new Date();
+            d.setMonth(d.getMonth() - 3);
+            let orders = await Order.find({date: {$gte: d}})
+
+            // put orders into ebayOrdersFilter based on store
+            orders.forEach(order => {
+                if(!ebayOrdersFilter[order.store]) ebayOrdersFilter[order.store] = [];
+                ebayOrdersFilter[order.store].push(order.orderId);
+            })
 
             let ebayStores = {};
             let ebayOrders = {}
@@ -316,7 +332,7 @@ export const fetchEBayOrders = async () => {
 
                 // Handle and process the fetched orders (parse response.data)
                 ebayStores[store.title].result = await ebayStores[store.title].instance.sell.fulfillment.getOrders({
-                    filter: 'creationdate:[' + new Date(lastAPICallTime).toISOString() + '..]',
+                    filter: 'lastmodifieddate:[' + new Date(lastAPICallTime).toISOString() + '..],orderfulfillmentstatus:{FULFILLED|IN_PROGRESS}',
                     limit: 200
                 });
 
@@ -327,18 +343,39 @@ export const fetchEBayOrders = async () => {
 
                 if(ebayStores[store.title].result.total > 200 ){
                     let loop = Math.ceil(ebayStores[store.title].result.total / 200);
-                    for(let i = 2; i <= loop; i++){
+                    for(let i = 2; i <= loop; i++) {
                         let orders = await ebayStores[store.title].instance.sell.fulfillment.getOrders({
-                            filter: 'creationdate:[' + new Date(lastAPICallTime).toISOString() + '..]',
+                            filter: 'lastmodifieddate:[' + new Date(lastAPICallTime).toISOString() + '..],orderfulfillmentstatus:{FULFILLED|IN_PROGRESS}',
                             limit: 200,
                             offset: (i-1) * 200,
-                            sort: 'creationdate:asc',
+                            sort: 'lastmodifieddate:asc',
                         });
                         ebayOrders[store.title] = ebayOrders[store.title].concat(orders.orders);
                     }
                 }
 
-                console.log(`Fetched ${ebayOrders[store.title].length} eBay orders From ${store.title} Store.`);
+                let newOrders = [];
+                // remove orders which are already in database
+                await new Promise((resolve, reject)=>{
+                    resolve()
+                })
+                let filteredOrders = ebayOrders[store.title].filter(order => {
+                    if (!ebayOrdersFilter[store.title].includes(order.orderId)){
+                        newOrders.push({
+                            orderId: order.orderId,
+                            store: store.title,
+                            date: order.lastModifiedDate,
+                        });
+                        return true
+                    }
+                    return false;
+                })
+
+                ebayOrders[store.title] = filteredOrders;
+                // insert new orders into order database
+                if(newOrders.length) await Order.insertMany(newOrders);
+
+                console.log(`Fetched  ${ebayOrders[store.title].length} new eBay orders From ${store.title} Store.`);
 
                 writeLog({
                     type: 'info',
@@ -370,7 +407,7 @@ export const postOrders = (orders) => {
             for (const store of storeList) {
                 let storeOrders = orders[store.title];
                 // filter orders with Payment status as PAID
-                storeOrders = storeOrders.filter(order => order.orderPaymentStatus === 'PAID');
+                // storeOrders = storeOrders.filter(order => order.orderPaymentStatus === 'PAID');
                 // if(storeOrders.length)
                     ebayCustomKits[store.title] = await getEbayCustomKits(store.title);
 

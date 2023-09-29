@@ -10,6 +10,7 @@ import propertyRouter from "./routes/property.routes.js";
 import febestRouter from "./routes/febest.routes.js";
 import autoplusRouter from "./routes/autoplus.routes.js";
 import LogsRouter from "./routes/logs.routes.js";
+import orderRouter from "./routes/order.routes.js";
 
 import run_scheduler from "./controllers/scheduler.js";
 dotenv.config();
@@ -28,6 +29,7 @@ app.use("/api/v1/home", propertyRouter);
 app.use("/api/v1/Febest", febestRouter);
 app.use("/api/v1/Autoplus", autoplusRouter);
 app.use("/api/v1/logs", LogsRouter);
+app.use("/api/v1/orders", orderRouter);
 
 app.use(express.static(path.join(__dirname, 'build')));
 app.get('/*', (req, res) => {
