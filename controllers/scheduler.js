@@ -16,7 +16,7 @@ const postNewOrdersToWMS = () => {
             // Get the eBay Orders
             let ebayOrders = await fetchEBayOrders();
             // Calculate the orders for Custom Label Kits to be posted to Datapel WMS
-            await postOrders(ebayOrders);
+            // await postOrders(ebayOrders);
             // Post the orders to Datapel WMS
             resolve();
         }
@@ -67,7 +67,7 @@ const runner = async () => {
     if (serverStatus && serverStatus.description == 'true') {
 
         await postNewOrdersToWMS();
-        await stockSync();
+        // await stockSync();
     }
 }
 
@@ -82,7 +82,6 @@ const run_scheduler = async () => {
     }
     console.log(time_at);
     schedule.scheduleJob(timeConverter(time_at), runner);
-    // await runner();
 }
 
 

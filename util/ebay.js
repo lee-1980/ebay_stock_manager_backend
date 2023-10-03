@@ -285,8 +285,8 @@ export const fetchEBayOrders = async () => {
                 date.setDate(date.getDate() - 1);
                 lastAPICallTime = date;
             } else {
-                lastAPICallTime = lastAPICallRecord.description;
-                // lastAPICallTime = '2023-09-25 18:41:11';
+                // lastAPICallTime = lastAPICallRecord.description;
+                lastAPICallTime = '2023-08-01 00:00:11';
             }
             // Get all orders from database which are latest 2 months ago
             let d = new Date();
@@ -364,6 +364,7 @@ export const fetchEBayOrders = async () => {
                         newOrders.push({
                             orderId: order.orderId,
                             store: store.title,
+                            saleReference: order.salesRecordReference,
                             date: order.lastModifiedDate,
                         });
                         return true
