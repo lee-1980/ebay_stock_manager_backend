@@ -17,17 +17,20 @@ const getAllProperties = async (req, res) => {
         const autoplusCount = await autoplus.countDocuments();
         const settingSystemOnOff = await Property.findOne({ title : "systemOnOff" });
         const settingRunTime = await Property.findOne({ title : "runTime" });
+        const settingStockTime = await Property.findOne({ title : "stockTime" });
         const lastSync = await Property.findOne({ title : "lastAPICallTime" });
         const serverOn = settingSystemOnOff ? (settingSystemOnOff.description == 'false' ? false : true) : false;
         const runTime = settingRunTime ? settingRunTime.description : '00:00:01';
         const lastSyncTime = lastSync ?dayjs(lastSync.description).format("YYYY-MM-DD HH:mm:ss") : '1970-01-01 00:00:01';
+        const StockTime = settingStockTime ? settingStockTime.description : '00:00:01';
 
         res.status(200).json({
             febestCount,
             autoplusCount,
             serverOn,
             runTime,
-            lastSyncTime
+            lastSyncTime,
+            StockTime
         });
 
     } catch (error) {
@@ -53,6 +56,13 @@ const updateSetting = async (req, res) => {
 
             if (key === 'runTime') {
                 Object.entries(schedule.scheduledJobs).forEach(([key, value]) => {
+                    if(key === 'o_time')
+                    value.reschedule(timeConverter(keyValue));
+                })
+            }
+            else if( key === 'stockTime'){
+                Object.entries(schedule.scheduledJobs).forEach(([key, value]) => {
+                    if(key === 's_time')
                     value.reschedule(timeConverter(keyValue));
                 })
             }

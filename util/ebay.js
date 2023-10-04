@@ -58,8 +58,12 @@ const getSaleLinesPerOrder = (lineItems, saleReference, store) => {
         if (!Array.isArray(lineItems) || lineItems.length === 0) resolve(saleLines);
         lineItems.forEach( async (item, index) => {
             try{
+                let shippingCost = item.deliveryCost && item.deliveryCost.hasOwnProperty('shippingCost')? parseFloat(item.deliveryCost.shippingCost.value) : 0;
+                let handlingCost = item.deliveryCost && item.deliveryCost.hasOwnProperty('handlingCost')? parseFloat(item.deliveryCost.handlingCost.value) : 0;
+
                 if(ebayCustomKits[store].hasOwnProperty(item.sku)) {
                     let subItemPriceInc = parseFloat(item.lineItemCost.value) / ebayCustomKits[store][item.sku]['qty'];
+                    let subItemPostage = (shippingCost + handlingCost) / ebayCustomKits[store][item.sku]['qty'];
                     for (const [key, value] of Object.entries(ebayCustomKits[store][item.sku])) {
                         if (key === 'qty') continue;
                         saleLines.push({
@@ -74,10 +78,12 @@ const getSaleLinesPerOrder = (lineItems, saleReference, store) => {
                             "SaleUnitAmountExcTax": (subItemPriceInc / 1.1).toFixed(2),
                             "SaleTaxUnitAmount": (subItemPriceInc - (subItemPriceInc / 1.1)).toFixed(2),
                             "SKUDescription": saleReference,
+                            "PostageAmount": (subItemPostage * value).toFixed(2)
                         });
                     }
                 }
                 else{
+                    let subItemPostage = shippingCost + handlingCost;
                     saleLines.push({
                         "SKU": item.sku,
                         "SaleUnitQty": item.quantity,
@@ -90,6 +96,7 @@ const getSaleLinesPerOrder = (lineItems, saleReference, store) => {
                         "SaleUnitAmountExcTax": (parseFloat(item.lineItemCost.value) / 1.1).toFixed(2),
                         "SaleTaxUnitAmount": (parseFloat(item.lineItemCost.value) - (parseFloat(item.lineItemCost.value) / 1.1)).toFixed(2),
                         "SKUDescription": saleReference,
+                        "PostageAmount": subItemPostage
                     });
                 }
 
@@ -152,9 +159,10 @@ const addFreightLine = (saleLines) => {
         let freightSaleIncTax = 0;
         let freightSaleExcTax = 0;
         saleLines.forEach( (item, index) => {
-            freightSaleIncTax += parseFloat(item.SaleUnitAmountIncTax) * item.SaleUnitQty;
-            freightSaleExcTax += parseFloat(item.SaleUnitAmountExcTax) * item.SaleUnitQty;
+            freightSaleIncTax += parseFloat(item.PostageAmount);
+            delete item.PostageAmount;
             if (index === saleLines.length - 1) {
+                freightSaleExcTax = (freightSaleIncTax / 1.1).toFixed(2);
                 saleLines.push({
                     "SKU": "FREIGHT",
                     "SaleUnitQty": 1,
@@ -163,7 +171,7 @@ const addFreightLine = (saleLines) => {
                     "SaleTaxCode": "GST",
                     "SaleUnitAmountIncTax": freightSaleIncTax.toFixed(2),
                     "SaleTaxRate": 10.00,
-                    "SaleUnitAmountExcTax": freightSaleExcTax.toFixed(2),
+                    "SaleUnitAmountExcTax": freightSaleExcTax,
                     "SaleTaxUnitAmount": (freightSaleIncTax - freightSaleExcTax).toFixed(2),
                     "SKUDescription": "Combined Freight",
                 });
@@ -285,8 +293,8 @@ export const fetchEBayOrders = async () => {
                 date.setDate(date.getDate() - 1);
                 lastAPICallTime = date;
             } else {
-                // lastAPICallTime = lastAPICallRecord.description;
-                lastAPICallTime = '2023-08-01 00:00:11';
+                lastAPICallTime = lastAPICallRecord.description;
+                // lastAPICallTime = '2023-10-03 03:00:11';
             }
             // Get all orders from database which are latest 2 months ago
             let d = new Date();
@@ -300,7 +308,7 @@ export const fetchEBayOrders = async () => {
             })
 
             let ebayStores = {};
-            let ebayOrders = {}
+            let ebayOrders = {};
             // Loop ebay stores
 
             for (const store of storeList) {
@@ -309,7 +317,7 @@ export const fetchEBayOrders = async () => {
                     instance: initializeEbay(),
                     token: '',
                     result: []
-                }
+                };
 
                 // Authenticate and obtain anc access token
                 ebayStores[store.title].token = await getAuthToken(ebayStores[store.title].instance, store.storeTokenName, store.title);
@@ -328,7 +336,7 @@ export const fetchEBayOrders = async () => {
                         date: new Date().toISOString()
                     })
 
-                })
+                });
 
                 // Handle and process the fetched orders (parse response.data)
                 ebayStores[store.title].result = await ebayStores[store.title].instance.sell.fulfillment.getOrders({
@@ -359,6 +367,7 @@ export const fetchEBayOrders = async () => {
                 await new Promise((resolve, reject)=>{
                     resolve()
                 })
+
                 let filteredOrders = ebayOrders[store.title].filter(order => {
                     if (!ebayOrdersFilter[store.title].includes(order.orderId)){
                         newOrders.push({
@@ -407,9 +416,10 @@ export const postOrders = (orders) => {
 
             for (const store of storeList) {
                 let storeOrders = orders[store.title];
+                // let storeOrders = testItemList;
                 // filter orders with Payment status as PAID
                 // storeOrders = storeOrders.filter(order => order.orderPaymentStatus === 'PAID');
-                // if(storeOrders.length)
+                if(storeOrders.length)
                     ebayCustomKits[store.title] = await getEbayCustomKits(store.title);
 
                 // get the saleLines from the orders
@@ -436,11 +446,11 @@ export const postOrders = (orders) => {
                         tREMOTETransSaleLines: saleLines
                     }
                 }
-                // console.log(ebaySalesOrderData.NewDataSet.tREMOTETransSaleLines, store.title)
+                console.log(ebaySalesOrderData.NewDataSet.tREMOTETransSaleLines, store.title)
                 if(saleLines.length > 0){
-                    let response = await postSalesOrder(ebaySalesOrderData)
-                    console.log(response.data, store.title)
-                }else{
+                    // let response = await postSalesOrder(ebaySalesOrderData)
+                    // console.log(response.data, store.title)
+                } else {
                     console.log('No orders to post', store.title)
                 }
             }

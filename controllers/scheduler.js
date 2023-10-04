@@ -16,7 +16,7 @@ const postNewOrdersToWMS = () => {
             // Get the eBay Orders
             let ebayOrders = await fetchEBayOrders();
             // Calculate the orders for Custom Label Kits to be posted to Datapel WMS
-            // await postOrders(ebayOrders);
+            await postOrders(ebayOrders);
             // Post the orders to Datapel WMS
             resolve();
         }
@@ -58,30 +58,47 @@ const stockSync =  () => {
     })
 }
 
-const runner = async () => {
+const o_runner = async () => {
 
     // get the Server Status
 
     const serverStatus = await Property.findOne({title: 'systemOnOff'});
 
     if (serverStatus && serverStatus.description == 'true') {
-
+        console.log('PostOrder')
         await postNewOrdersToWMS();
-        // await stockSync();
     }
 }
 
+const s_runner = async () => {
+    // get the Server Status
+
+    const serverStatus = await Property.findOne({title: 'systemOnOff'});
+
+    if (serverStatus && serverStatus.description == 'true') {
+        console.log('StockSync')
+        await stockSync();
+    }
+}
+
+
 // Schedule order fetching (e.g., every 30 minutes)
 const run_scheduler = async () => {
-    let time_at = '00:00:01';
-
+    let o_time_at = '00:00:01';
+    let s_time_at = '00:00:01';
     // Get the Run Time from Database Setting
     let runTime = await Property.findOne({title: 'runTime'});
+    let stockTime = await Property.findOne({title: 'stockTime'});
     if (runTime && runTime.description !== null) {
-        time_at = runTime.description;
+        o_time_at = runTime.description;
     }
-    console.log(time_at);
-    schedule.scheduleJob(timeConverter(time_at), runner);
+    if (stockTime && stockTime.description !== null) {
+        s_time_at = stockTime.description;
+    }
+    console.log(o_time_at, 'run time');
+    console.log(s_time_at, 'stock time');
+    schedule.scheduleJob('o_time', timeConverter(o_time_at), o_runner);
+    schedule.scheduleJob('s_time', timeConverter(s_time_at), s_runner);
 }
 
 
