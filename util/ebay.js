@@ -446,10 +446,10 @@ export const postOrders = (orders) => {
                         tREMOTETransSaleLines: saleLines
                     }
                 }
-                // console.log(ebaySalesOrderData.NewDataSet.tREMOTETransSaleLines, store.title)
+                console.log(ebaySalesOrderData.NewDataSet.tREMOTETransSaleLines, store.title)
                 if(saleLines.length > 0){
-                    let response = await postSalesOrder(ebaySalesOrderData)
-                    console.log(response.data, store.title)
+                    // let response = await postSalesOrder(ebaySalesOrderData)
+                    // console.log(response.data, store.title)
                 } else {
                     console.log('No orders to post', store.title)
                 }
