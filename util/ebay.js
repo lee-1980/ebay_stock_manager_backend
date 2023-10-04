@@ -509,12 +509,13 @@ export const postStockChangesToEbay = (stockChanges) => {
                 let dataLength = dataSource.length;
                 let rearrangedStockChanges = regroupArray(dataSource);
 
+                console.log("Posting to eBay...!", store.title)
                 for ( let i = 0 ; i < rearrangedStockChanges.length ; i++ ) {
                     let subGroup = rearrangedStockChanges[i];
 
                     try{
                         // Handle and process the fetched orders (parse response.data)
-                        let result = await ebayStores[store.title].instance.trading.ReviseInventoryStatus({
+                        await ebayStores[store.title].instance.trading.ReviseInventoryStatus({
                             InventoryStatus: subGroup.map((item)=>{
                                 return {
                                     ItemID: item.item_number,
@@ -522,8 +523,6 @@ export const postStockChangesToEbay = (stockChanges) => {
                                 }
                             })
                         });
-
-                        console.log(result, store.title)
                     }
                     catch (e) {
                         console.log(e.message, store.title)
