@@ -306,7 +306,7 @@ export const getStockChanges = () => {
                         reject(err.message);
                         return ;
                     }
-                    resolve(stockChanges.data.slice(0,100));
+                    resolve(stockChanges.data);
                 })
 
             } else{

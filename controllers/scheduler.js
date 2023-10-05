@@ -6,6 +6,7 @@ import { writeLog } from "./log.controller.js";
 import { fetchEBayOrders, postStockChangesToEbay, postOrders} from "../util/ebay.js";
 import { timeConverter} from "../util/timeConverter.js";
 import { getStockChanges , calculateStockChanges} from "../util/datapel.js";
+import { changes } from "../log/stockChanges.js";
 
 
 // Function to post new orders of ebay to Datapel WMS
@@ -39,7 +40,7 @@ const stockSync =  () => {
             console.log('stock sync');
             // Get the Stock Changes from Datapel WMS
             let stockChanges = await getStockChanges();
-
+            // let stockChanges = changes;
             // Calculate the Stock Changes to be posted to eBay
             let calculatedStockChanges = await calculateStockChanges(stockChanges);
 

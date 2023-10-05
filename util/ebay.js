@@ -55,14 +55,14 @@ const getRows = (model, condition, reference) => {
 const getSaleLinesPerOrder = (lineItems, saleReference, store) => {
     return new Promise((resolve) => {
         let saleLines = [];
-        if (!Array.isArray(lineItems) || lineItems.length === 0) resolve(saleLines);
+        if (!Array.isArray(lineItems) || lineItems.length === 0) resolve(saleLines); console.log(lineItems)
         lineItems.forEach( async (item, index) => {
             try{
                 let shippingCost = item.deliveryCost && item.deliveryCost.hasOwnProperty('shippingCost')? parseFloat(item.deliveryCost.shippingCost.value) : 0;
                 let handlingCost = item.deliveryCost && item.deliveryCost.hasOwnProperty('handlingCost')? parseFloat(item.deliveryCost.handlingCost.value) : 0;
-
+                let itemPriceInc = parseFloat(item.hasOwnProperty('discountedLineItemCost')? item.discountedLineItemCost.value : item.lineItemCost.value) / item.quantity;
                 if(ebayCustomKits[store].hasOwnProperty(item.sku)) {
-                    let subItemPriceInc = parseFloat(item.lineItemCost.value) / ebayCustomKits[store][item.sku]['qty'];
+                    let subItemPriceInc = itemPriceInc / ebayCustomKits[store][item.sku]['qty'] ;
                     let subItemPostage = (shippingCost + handlingCost) / ebayCustomKits[store][item.sku]['qty'];
                     for (const [key, value] of Object.entries(ebayCustomKits[store][item.sku])) {
                         if (key === 'qty') continue;
@@ -90,11 +90,11 @@ const getSaleLinesPerOrder = (lineItems, saleReference, store) => {
                         "SaleTaxByHost": "N",
                         "SalePriceByHost": "N",
                         "SaleTaxCode": "GST",
-                        "SaleUnitAmountIncTax": item.lineItemCost.value,
+                        "SaleUnitAmountIncTax": itemPriceInc.toFixed(2),
                         "SaleTaxRate": 10.00,
                         // need to get the price without tax, so divide by 1.1 and get the value until decimal digit 2
-                        "SaleUnitAmountExcTax": (parseFloat(item.lineItemCost.value) / 1.1).toFixed(2),
-                        "SaleTaxUnitAmount": (parseFloat(item.lineItemCost.value) - (parseFloat(item.lineItemCost.value) / 1.1)).toFixed(2),
+                        "SaleUnitAmountExcTax": (itemPriceInc / 1.1).toFixed(2),
+                        "SaleTaxUnitAmount": (itemPriceInc - (itemPriceInc / 1.1)).toFixed(2),
                         "SKUDescription": saleReference,
                         "PostageAmount": subItemPostage
                     });
@@ -294,7 +294,7 @@ export const fetchEBayOrders = async () => {
                 lastAPICallTime = date;
             } else {
                 lastAPICallTime = lastAPICallRecord.description;
-                // lastAPICallTime = '2023-10-03 03:00:11';
+                // lastAPICallTime = '2023-10-04 03:00:11';
             }
             // Get all orders from database which are latest 2 months ago
             let d = new Date();
@@ -364,11 +364,9 @@ export const fetchEBayOrders = async () => {
 
                 let newOrders = [];
                 // remove orders which are already in database
-                await new Promise((resolve, reject)=>{
-                    resolve()
-                })
 
                 let filteredOrders = ebayOrders[store.title].filter(order => {
+                    // if(order.orderId === '26-10607-44924') return true;
                     if (!ebayOrdersFilter[store.title].includes(order.orderId)){
                         newOrders.push({
                             orderId: order.orderId,
@@ -419,6 +417,7 @@ export const postOrders = (orders) => {
                 // let storeOrders = testItemList;
                 // filter orders with Payment status as PAID
                 // storeOrders = storeOrders.filter(order => order.orderPaymentStatus === 'PAID');
+
                 if(storeOrders.length)
                     ebayCustomKits[store.title] = await getEbayCustomKits(store.title);
 
