@@ -21,7 +21,7 @@ const getAllOrders = async (req, res) => {
         const properties = await Order.find(query)
             .limit(_end - _start)
             .skip(_start)
-            .sort({ ['orderId']: 'asc' });
+            .sort({ ['date']: 'desc' });
 
         res.header("x-total-count", count);
         res.header("Access-Control-Expose-Headers", "x-total-count");

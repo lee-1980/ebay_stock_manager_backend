@@ -13,6 +13,7 @@ import LogsRouter from "./routes/logs.routes.js";
 import orderRouter from "./routes/order.routes.js";
 
 import run_scheduler from "./controllers/scheduler.js";
+import { configureSocket } from "./util/socket.js";
 dotenv.config();
 
 const app = express();
@@ -32,19 +33,20 @@ app.use("/api/v1/logs", LogsRouter);
 app.use("/api/v1/orders", orderRouter);
 
 app.use(express.static(path.join(__dirname, 'build')));
+
 app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
-
 
 
 const startServer = async () => {
     try {
 
         connectDB(process.env.MONGODB_URL, run_scheduler);
-        app.listen(8000, () =>{
+        const expressServer = app.listen(8000, () =>{
             console.log("Server started on port http://localhost:8000");
         });
+        configureSocket(expressServer);
 
     } catch (error) {
         console.log(error);

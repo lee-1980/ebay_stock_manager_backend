@@ -6,6 +6,7 @@ import { writeLog } from "./log.controller.js";
 import { fetchEBayOrders, postStockChangesToEbay, postOrders} from "../util/ebay.js";
 import { timeConverter} from "../util/timeConverter.js";
 import { getStockChanges , calculateStockChanges} from "../util/datapel.js";
+import {getSocketInstance}  from "../util/socket.js";
 import { changes } from "../log/stockChanges.js";
 
 
@@ -14,11 +15,18 @@ import { changes } from "../log/stockChanges.js";
 const postNewOrdersToWMS = () => {
     return new Promise(async (resolve)=> {
         try{
+            let socketInstance = getSocketInstance();
+
+            if(socketInstance) {
+                socketInstance.emit('orderMessage', 'Start to fetch eBay Orders');
+            }
             // Get the eBay Orders
             let ebayOrders = await fetchEBayOrders();
             // Calculate the orders for Custom Label Kits to be posted to Datapel WMS
+            if(socketInstance) socketInstance.emit('orderMessage', 'Start to post eBay Orders to Datapel WMS');
             await postOrders(ebayOrders);
             // Post the orders to Datapel WMS
+            if(socketInstance) socketInstance.emit('orderMessage', 'Finished posting eBay Orders to Datapel WMS');
             resolve();
         }
         catch (e) {
@@ -37,15 +45,22 @@ const postNewOrdersToWMS = () => {
 const stockSync =  () => {
     return new Promise(async (resolve)=>{
         try{
-            console.log('stock sync');
+            let socketInstance = getSocketInstance();
+
+            if(socketInstance) {
+                socketInstance.emit('stockMessage', 'Start to fetch Stock Changes from Datapel WMS');
+            }
             // Get the Stock Changes from Datapel WMS
-            let stockChanges = await getStockChanges();
-            // let stockChanges = changes;
+            // let stockChanges = await getStockChanges();
+            let stockChanges = changes;
             // Calculate the Stock Changes to be posted to eBay
             let calculatedStockChanges = await calculateStockChanges(stockChanges);
 
+            if(socketInstance) socketInstance.emit('stockMessage', 'Start to post Stock Changes to eBay');
             // Post the Stock Changes to eBay
             await postStockChangesToEbay(calculatedStockChanges);
+
+            if(socketInstance) socketInstance.emit('stockMessage', 'Finished posting Stock Changes to eBay');
             resolve();
         }
         catch (e) {

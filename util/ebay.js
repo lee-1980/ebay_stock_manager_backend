@@ -9,6 +9,7 @@ import { writeLog } from "../controllers/log.controller.js";
 import { storeList } from "./constant.js";
 import {postSalesOrder} from "./datapel.js";
 import {testItemList} from "../log/request1.js";
+import {getSocketInstance} from "./socket.js";
 
 dotenv.config();
 
@@ -294,7 +295,7 @@ export const fetchEBayOrders = async () => {
                 lastAPICallTime = date;
             } else {
                 lastAPICallTime = lastAPICallRecord.description;
-                // lastAPICallTime = '2023-10-04 03:00:11';
+                // lastAPICallTime = '2023-10-05 03:00:11';
             }
             // Get all orders from database which are latest 2 months ago
             let d = new Date();
@@ -318,6 +319,7 @@ export const fetchEBayOrders = async () => {
                     token: '',
                     result: []
                 };
+                ebayOrders[store.title] = [];
 
                 // Authenticate and obtain anc access token
                 ebayStores[store.title].token = await getAuthToken(ebayStores[store.title].instance, store.storeTokenName, store.title);
@@ -467,7 +469,7 @@ export const postStockChangesToEbay = (stockChanges) => {
         try {
             let stockObj = {};
             let ebayStores = {};
-
+            let socketInstance = getSocketInstance()
             let SKUList = stockChanges.map( item => {
                 stockObj[item.SKU] = item.QTY;
                 return { 'csku' : item.SKU }
@@ -508,7 +510,10 @@ export const postStockChangesToEbay = (stockChanges) => {
                 let dataLength = dataSource.length;
                 let rearrangedStockChanges = regroupArray(dataSource);
 
-                console.log("Posting to eBay...!", store.title)
+                console.log("Posting to eBay...!", store.title);
+
+                socketInstance.emit('stockMessage', `Posting ${dataLength} Items' stock Change To ${store.title} Store.`)
+
                 for ( let i = 0 ; i < rearrangedStockChanges.length ; i++ ) {
                     let subGroup = rearrangedStockChanges[i];
 
@@ -522,6 +527,8 @@ export const postStockChangesToEbay = (stockChanges) => {
                                 }
                             })
                         });
+
+                        await socketInstance.emit('stockMessage', `Posted ${(i+1)*4} of ${dataLength} Items' stock Change To ${store.title} Store.`)
                     }
                     catch (e) {
                         console.log(e.message, store.title)
