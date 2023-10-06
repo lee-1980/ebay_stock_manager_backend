@@ -51,8 +51,8 @@ const stockSync =  () => {
                 socketInstance.emit('stockMessage', 'Start to fetch Stock Changes from Datapel WMS');
             }
             // Get the Stock Changes from Datapel WMS
-            // let stockChanges = await getStockChanges();
-            let stockChanges = changes;
+            let stockChanges = await getStockChanges();
+            // let stockChanges = changes;
             // Calculate the Stock Changes to be posted to eBay
             let calculatedStockChanges = await calculateStockChanges(stockChanges);
 
