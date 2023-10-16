@@ -15,12 +15,12 @@ export const changes = [
         "QTY": "0"
     },
     {
-        "SKU": "TAB-369Z",
+        "SKU": "TAB-226",
         "Name": "OUTER CV JOINT 23X60X27",
         "QTY": "0"
     },
     {
-        "SKU": "0117P-GGL15",
+        "SKU": "DAC43800040M",
         "Name": "OUTER CV JOINT 23X60X27",
         "QTY": "0"
     }

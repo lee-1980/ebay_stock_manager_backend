@@ -223,11 +223,47 @@ export const getAuthToken = () => {
     })
 }
 
+export const getAvailableStock = (skuChangeList) => {
+    return new Promise(async (resolve, reject)=>{
+
+        const credential = new Buffer.from(process.env.DATEPEL_USERNAME + ':' + process.env.DATEPEL_PASSWORD).toString('base64');
+        const authToken = await getAuthToken();
+        let availableStockChanges = [];
+        let url = 'https://febest.datapelapi.com/JSON/inventorylist?filter~itemnumber='
+
+        for(let i = 0 ; i < skuChangeList.length; i ++){
+            try{
+                const response = await axios.get(`${url}'${skuChangeList[i].SKU}'`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': credential,
+                        'auth_token': authToken,
+                    }
+                })
+                const data = response.data.inventorylist ? response.data.inventorylist : [];
+                availableStockChanges.push(
+                    {
+                        SKU: skuChangeList[i].SKU,
+                        QTY: data[0].availqty && data[0].availqty > 0? data[0].availqty : 0,
+                    }
+                )
+            }
+            catch (e) {
+                console.log(e.message, 'getAvailableStock')
+                continue;
+            }
+        }
+
+        // console.log(availableStockChanges, 'availableChanges');
+        resolve(availableStockChanges)
+    })
+}
+
 export const calculateStockChanges = (stockChanges) => {
     return new Promise(async (resolve, reject) => {
         try {
             if(stockChanges.length === 0) resolve([]);
-            let updatedStockChanges = stockChanges;
+            let updatedStockChanges = await getAvailableStock(stockChanges);
 
             // Get the Custom SKU combination from the database
             // 1) From Febest
@@ -289,7 +325,7 @@ export const getStockChanges = () => {
 
             if (dataPel && dataPel.description !== null) {
                 let cacheID = dataPel.description;
-                url = `https://febest.datapelapi.com/JSON/SQL?filter~Select%20*%20from%20vOSS_ProductStock%20WITH%20DIFF%20ON%20${cacheID}`;
+                url = `https://febest.datapelapi.com/JSON/SQL?filter~Select%20*%20from%20vOSS_ProductStock%20WITH%20CACHE%20DIFF%20ON%20${cacheID}`;
             }
             else {
                 url = `https://febest.datapelapi.com/JSON/SQL?filter~Select%20*%20from%20vOSS_ProductStock%20WITH%20CACHE`;
