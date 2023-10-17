@@ -287,6 +287,7 @@ export const fetchEBayOrders = async () => {
         try {
             // Get the last API call time
             let lastAPICallRecord = await Property.findOne({title: 'lastAPICallTime'});
+            let socketInstance = getSocketInstance()
             let lastAPICallTime;
 
             if (!lastAPICallRecord || lastAPICallRecord.description == null) {
@@ -366,10 +367,11 @@ export const fetchEBayOrders = async () => {
 
                 let newOrders = [];
                 // remove orders which are already in database
-
+                d = new Date();
+                d.setMonth(d.getMonth() -2);
                 let filteredOrders = ebayOrders[store.title].filter(order => {
                     // if(order.orderId === '26-10607-44924') return true;
-                    if (!ebayOrdersFilter[store.title].includes(order.orderId)){
+                    if (!ebayOrdersFilter[store.title].includes(order.orderId) && new Date(order.creationDate) > d){
                         newOrders.push({
                             orderId: order.orderId,
                             store: store.title,
@@ -396,8 +398,10 @@ export const fetchEBayOrders = async () => {
             }
 
             //save the last API call time
-
-            await Property.updateOne({title: 'lastAPICallTime'}, {description: new Date().toISOString()}, {upsert: true});
+            let tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+            let localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
+            await Property.updateOne({title: 'lastAPICallTime'}, {description: localISOTime}, {upsert: true});
+            await socketInstance.emit('lastAPICallTime', localISOTime)
 
             resolve(ebayOrders);
 
@@ -411,6 +415,7 @@ export const fetchEBayOrders = async () => {
 export const postOrders = (orders) => {
     return new Promise(async (resolve, reject)=>{
         try{
+
             const currentDateTime = new Date();
             const formattedDate = currentDateTime.toLocaleString("en-US", {month: 'short'}) + '-' + currentDateTime.getDate()  + '-' + currentDateTime.getFullYear()
 
