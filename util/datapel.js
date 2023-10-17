@@ -333,9 +333,9 @@ export const getStockChanges = () => {
 
             // Get the stock changes
             let stockChanges = await getItemStockChanges(url);
-            console.log(stockChanges.data, 'Chached data')
+            // console.log(stockChanges.data, 'Chached data')
             let cacheObject = stockChanges.data.pop();
-            console.log(cacheObject)
+            // console.log(cacheObject)
             if(cacheObject.cacheid){
                 // Update the Datapel Cache ID
                 Property.updateOne({title: 'datapelCacheID'}, { description: cacheObject.cacheid, updated_at: new Date() }, {upsert: true}, (err, res) => {

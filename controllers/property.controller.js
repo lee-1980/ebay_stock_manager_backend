@@ -17,12 +17,20 @@ const getAllProperties = async (req, res) => {
         const autoplusCount = await autoplus.countDocuments();
         const settingSystemOnOff = await Property.findOne({ title : "systemOnOff" });
         const settingRunTime = await Property.findOne({ title : "runTime" });
-        const settingStockTime = await Property.findOne({ title : "stockTime" });
+        const settingStockTime = await Property.findOne({ title: "stockTime" });
+        const settingStockATime = await Property.findOne({ title: 'stockTimeA'});
+        const stockAOnOff = await Property.findOne({ title : "stockTimeAOnOff" });
+        const settingStockBTime = await Property.findOne({ title: "stockTimeB" });
+        const stockBOnOff = await Property.findOne({ title : "stockTimeBOnOff" });
         const lastSync = await Property.findOne({ title : "lastAPICallTime" });
+        const stockAOn = stockAOnOff ? (stockAOnOff.description == 'false' ? false : true) : false;
+        const stockBOn = stockBOnOff ? (stockBOnOff.description == 'false' ? false : true) : false;
         const serverOn = settingSystemOnOff ? (settingSystemOnOff.description == 'false' ? false : true) : false;
         const runTime = settingRunTime ? settingRunTime.description : '00:00:01';
         const lastSyncTime = lastSync ?dayjs(lastSync.description).format("YYYY-MM-DD HH:mm:ss") : '1970-01-01 00:00:01';
         const StockTime = settingStockTime ? settingStockTime.description : '00:00:01';
+        const StockATime = settingStockATime ? settingStockATime.description : '00:00:01';
+        const StockBTime = settingStockBTime ? settingStockBTime.description : '00:00:01';
 
         res.status(200).json({
             febestCount,
@@ -30,7 +38,11 @@ const getAllProperties = async (req, res) => {
             serverOn,
             runTime,
             lastSyncTime,
-            StockTime
+            StockTime,
+            StockATime,
+            StockBTime,
+            stockAOn,
+            stockBOn
         });
 
     } catch (error) {
@@ -64,6 +76,18 @@ const updateSetting = async (req, res) => {
                 Object.entries(schedule.scheduledJobs).forEach(([key, value]) => {
                     if(key === 's_time')
                     value.reschedule(timeConverter(keyValue));
+                })
+            }
+            else if( key === 'stockTimeA'){
+                Object.entries(schedule.scheduledJobs).forEach(([key, value]) => {
+                    if(key === 's_timea')
+                        value.reschedule(timeConverter(keyValue));
+                })
+            }
+            else if( key === 'stockTimeB'){
+                Object.entries(schedule.scheduledJobs).forEach(([key, value]) => {
+                    if(key === 's_timeb')
+                        value.reschedule(timeConverter(keyValue));
                 })
             }
         }
