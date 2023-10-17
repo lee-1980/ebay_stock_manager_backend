@@ -325,7 +325,7 @@ export const getStockChanges = () => {
 
             if (dataPel && dataPel.description !== null) {
                 let cacheID = dataPel.description;
-                url = `https://febest.datapelapi.com/JSON/SQL?filter~Select%20*%20from%20vOSS_ProductStock%20WITH%20CACHE%20DIFF%20ON%20${cacheID}`;
+                url = `https://febest.datapelapi.com/JSON/SQL?filter~Select%20*%20from%20vOSS_ProductStock%20WITH%20DIFF%20ON%20${cacheID}`;
             }
             else {
                 url = `https://febest.datapelapi.com/JSON/SQL?filter~Select%20*%20from%20vOSS_ProductStock%20WITH%20CACHE`;
@@ -333,8 +333,9 @@ export const getStockChanges = () => {
 
             // Get the stock changes
             let stockChanges = await getItemStockChanges(url);
+            console.log(stockChanges.data, 'Chached data')
             let cacheObject = stockChanges.data.pop();
-
+            console.log(cacheObject)
             if(cacheObject.cacheid){
                 // Update the Datapel Cache ID
                 Property.updateOne({title: 'datapelCacheID'}, { description: cacheObject.cacheid, updated_at: new Date() }, {upsert: true}, (err, res) => {
