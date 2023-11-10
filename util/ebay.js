@@ -298,7 +298,6 @@ export const fetchEBayOrders = async () => {
                 lastAPICallTime = lastAPICallRecord.description;
                 // lastAPICallTime = '2023-10-05 03:00:11';
             }
-            lastAPICallTime = '2023-08-05 03:00:11';
             // Get all orders from database which are latest 2 months ago
             let d = new Date();
             d.setMonth(d.getMonth() - 3);
