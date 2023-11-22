@@ -95,7 +95,7 @@ export const getAuthTokenFromAPI = () => {
         try {
 
             const credential = new Buffer.from(process.env.DATEPEL_USERNAME + ':' + process.env.DATEPEL_PASSWORD).toString('base64');
-            const response = await axios.get('https://febest.datapelapi.com/json/token', {
+            const response = await axios.get('https://febest.datapelapi.net/json/token', {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': credential
@@ -140,7 +140,7 @@ export const postSalesOrder = (data) => {
 
             const authToken = await getAuthToken();
 
-            const response = await axios.post('https://febest.datapelapi.com/JSON/salesqueue?filter~',  JSON.stringify(data),{
+            const response = await axios.post('https://febest.datapelapi.net/JSON/salesqueue?filter~',  JSON.stringify(data),{
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': credential,
@@ -167,7 +167,7 @@ const getSubItemStocksFromAPI = (skuObj) => {
                 newSkuObj[key] = value;
             });
             if (whereQuery) whereQuery = whereQuery.slice(0, -1);
-            let stock = await getItemStockChanges(`https://febest.datapelapi.com/JSON/sql?filter~Select * from vOSS_ProductStock WHERE SKU IN (${whereQuery})`);
+            let stock = await getItemStockChanges(`https://febest.datapelapi.net/JSON/sql?filter~Select * from vOSS_ProductStock WHERE SKU IN (${whereQuery})`);
 
             if (stock.data.length === 0) throw new Error('No sub item stock qty data found in DataPel House');
 
@@ -229,7 +229,7 @@ export const getAvailableStock = (skuChangeList) => {
         const credential = new Buffer.from(process.env.DATEPEL_USERNAME + ':' + process.env.DATEPEL_PASSWORD).toString('base64');
         const authToken = await getAuthToken();
         let availableStockChanges = [];
-        let url = 'https://febest.datapelapi.com/JSON/inventorylist?filter~itemnumber='
+        let url = 'https://febest.datapelapi.net/JSON/inventorylist?filter~itemnumber='
 
         for(let i = 0 ; i < skuChangeList.length; i ++){
             try{
@@ -325,10 +325,10 @@ export const getStockChanges = () => {
 
             if (dataPel && dataPel.description !== null) {
                 let cacheID = dataPel.description;
-                url = `https://febest.datapelapi.com/JSON/SQL?filter~Select%20*%20from%20vOSS_ProductStock%20WITH%20DIFF%20ON%20${cacheID}`;
+                url = `https://febest.datapelapi.net/JSON/SQL?filter~Select%20*%20from%20vOSS_ProductStock%20WITH%20DIFF%20ON%20${cacheID}`;
             }
             else {
-                url = `https://febest.datapelapi.com/JSON/SQL?filter~Select%20*%20from%20vOSS_ProductStock%20WITH%20CACHE`;
+                url = `https://febest.datapelapi.net/JSON/SQL?filter~Select%20*%20from%20vOSS_ProductStock%20WITH%20CACHE`;
             }
 
             // Get the stock changes
