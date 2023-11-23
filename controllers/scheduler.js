@@ -24,7 +24,7 @@ const postNewOrdersToWMS = () => {
             let ebayOrders = await fetchEBayOrders();
             // Calculate the orders for Custom Label Kits to be posted to Datapel WMS
             if(socketInstance) socketInstance.emit('orderMessage', 'Start to post eBay Orders to Datapel WMS');
-            await postOrders(ebayOrders);
+            // await postOrders(ebayOrders);
             // Post the orders to Datapel WMS
             if(socketInstance) socketInstance.emit('orderMessage', 'Finished posting eBay Orders to Datapel WMS');
             resolve();
